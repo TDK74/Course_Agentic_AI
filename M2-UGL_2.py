@@ -1,7 +1,7 @@
 import aisuite as ais
 import json
-import utils
 import pandas as pd
+import utils
 
 from dotenv import load_dotenv
 
@@ -218,5 +218,7 @@ def run_sql_workflow(db_path: str, question: str, model_generation: str = "opena
     utils.print_html(df_v2, title = "✅ Step 5 — Execute V2 (Final Answer)")
 
 ## ------------------------------------------------------ ##
-run_sql_workflow("product.db", "Which color of product has the highest total sales?",
-                 model_generation = "openai:gpt-4.1", model_evalution = "openai:gpt-4.1")
+run_sql_workflow("product.db",
+                 "Which color of product has the highest total sales?",
+                 model_generation = "openai:gpt-4.1",
+                 model_evalution = "openai:gpt-4.1")
