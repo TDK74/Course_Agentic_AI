@@ -124,12 +124,9 @@ def generate_llm_code(prompt: str, *, inventory_tbl, transactions_tbl, model: st
     schema_block = inv_utils.build_schema_block(inventory_tbl, transactions_tbl)
     prompt = PROMPT.format(schema_block = schema_block, question = prompt)
 
-    resp = client.chat.completions.create(
-                                        model = model,
-                                        temperature = temperature,
-                                        messages = [
-                                                    {
-                                                    "role" : "system",
+    resp = client.chat.completions.create(model = model, temperature = temperature,
+                                          messages = [
+                                                    {"role" : "system",
                                                     "content" : ("You write safe, well-commented "
                                                                 "TinyDB code to handle data "
                                                                 "questions and updates.")
@@ -175,18 +172,14 @@ def execute_generated_code(code_or_content: str, *, db, inventory_tbl, transacti
                            user_request: Optional[str] = None, ) -> Dict[str, Any]:
     code = _extract_execute_block(code_or_content)
 
-    SAFE_GLOBALS = {
-                    "Query" : Query,
+    SAFE_GLOBALS = {"Query" : Query,
                     "get_current_balance" : inv_utils.get_current_balance,
                     "next_transaction_id" : inv_utils.next_transaction_id,
                     "user_request" : user_request or "",
                     }
 
-    SAFE_LOCALS = {
-                    "db" : db,
-                    "inventory_tbl" : inventory_tbl,
-                    "transactions_tbl" : transactions_tbl,
-                    }
+    SAFE_LOCALS = {"db" : db, "inventory_tbl" : inventory_tbl,
+                   "transactions_tbl" : transactions_tbl, }
 
     _stdout_buf, _old_stdout = io.StringIO(), sys.stdout
     sys.stdout = _stdout_buf
@@ -203,29 +196,15 @@ def execute_generated_code(code_or_content: str, *, db, inventory_tbl, transacti
 
     printed = _stdout_buf.getvalue().strip()
 
-    answer = (
-            SAFE_LOCALS.get("answer_text")
-            or SAFE_LOCALS.get("answer_rows")
-            or SAFE_LOCALS.get("answer_json")
-            )
+    answer = (SAFE_LOCALS.get("answer_text") or SAFE_LOCALS.get("answer_rows")
+              or SAFE_LOCALS.get("answer_json"))
 
-    return {
-            "code" : code,
-            "stdout" : printed,
-            "error" : err_text,
-            "answer" : answer,
-            "transactions_tbl" : transactions_tbl.all(),
-            "inventory_tbl" : inventory_tbl.all(),
-            }
+    return {"code" : code, "stdout" : printed, "error" : err_text, "answer" : answer,
+            "transactions_tbl" : transactions_tbl.all(), "inventory_tbl" : inventory_tbl.all(), }
 
 ## ------------------------------------------------------ ##
-result = execute_generated_code(
-                                full_content_round,
-                                db = db,
-                                inventory_tbl = inventory_tbl,
-                                transactions_tbl = transactions_tbl,
-                                user_request = prompt_round,
-                                )
+result = execute_generated_code(full_content_round, db = db, inventory_tbl = inventory_tbl,
+                                transactions_tbl = transactions_tbl, user_request = prompt_round, )
 
 utils.print_html(result["answer"], title = "Plan Execution · Extracted Answer")
 
@@ -240,13 +219,9 @@ utils.print_html(json.dumps(aviators, indent = 2), title = "Inventory status: Av
 ## ------------------------------------------------------ ##
 prompt_aviator = "Return 2 Aviator sunglasses I bought last week."
 
-full_content_aviator = generate_llm_code(
-                                        prompt_aviator,
-                                        inventory_tbl = inventory_tbl,
-                                        transactions_tbl = transactions_tbl,
-                                        model = "o4-mini",
-                                        temperature = 1,
-                                        )
+full_content_aviator = generate_llm_code(prompt_aviator, inventory_tbl = inventory_tbl,
+                                        transactions_tbl = transactions_tbl, model = "o4-mini",
+                                        temperature = 1, )
 
 utils.print_html(full_content_aviator, title = "Plan with Code (Full Response)")
 
@@ -255,13 +230,8 @@ utils.print_html(json.dumps(transactions_tbl.all(), indent = 2), title = "Transa
                                                                             "Before Return")
 
 ## ------------------------------------------------------ ##
-result = execute_generated_code(
-                                full_content_aviator,
-                                db = db,
-                                inventory_tbl = inventory_tbl,
-                                transactions_tbl = transactions_tbl,
-                                user_request = prompt_aviator,
-                                )
+result = execute_generated_code(full_content_aviator, db = db, inventory_tbl = inventory_tbl,
+                            transactions_tbl = transactions_tbl, user_request = prompt_aviator, )
 
 utils.print_html(result["answer"], title = "Plan Execution · Extracted Answer")
 
@@ -287,13 +257,10 @@ def customer_service_agent(question: str, *, db, inventory_tbl, transactions_tbl
 
     utils.print_html(question, title = "User Question")
 
-    full_content = generate_llm_code(
-                                    question,
-                                    inventory_tbl = inventory_tbl,
-                                    transactions_tbl = transactions_tbl,
-                                    model = model,
-                                    temperature = temperature,
-                                    )
+    full_content = generate_llm_code(question, inventory_tbl = inventory_tbl,
+                                    transactions_tbl = transactions_tbl, model = model,
+                                    temperature = temperature, )
+
     utils.print_html(full_content, title = "Plan with Code (Full Response)")
 
     utils.print_html(json.dumps(inventory_tbl.all(), indent = 2), title = "Inventory " \
@@ -301,26 +268,18 @@ def customer_service_agent(question: str, *, db, inventory_tbl, transactions_tbl
     utils.print_html(json.dumps(transactions_tbl.all(), indent = 2), title = "Transactions " \
                                                                             "Table · Before")
 
-    exec_res = execute_generated_code(
-                                    full_content,
-                                    db = db,
-                                    inventory_tbl = inventory_tbl,
-                                    transactions_tbl = transactions_tbl,
-                                    user_request = question,
-                                    )
+    exec_res = execute_generated_code(full_content, db = db, inventory_tbl = inventory_tbl,
+                                    transactions_tbl = transactions_tbl, user_request = question, )
 
     utils.print_html(exec_res["answer"], title = "Plan Execution · Extracted Answer")
-    utils.print_html(json.dumps(inventory_tbl.all(), indent = 2), title = "Inventory Table · After")
+    utils.print_html(json.dumps(inventory_tbl.all(), indent = 2), title = "Inventory " \
+                                                                        "Table · After")
     utils.print_html(json.dumps(transactions_tbl.all(), indent = 2), title = "Transactions " \
                                                                             "Table · After")
 
-    return {
-            "full_content": full_content,
-            "exec": {
-                    "code" : exec_res["code"],
-                    "stdout" : exec_res["stdout"],
-                    "error" : exec_res["error"],
-                    "answer" : exec_res["answer"],
+    return {"full_content": full_content,
+            "exec": {"code" : exec_res["code"], "stdout" : exec_res["stdout"],
+                    "error" : exec_res["error"], "answer" : exec_res["answer"],
                     "inventory_after" : inventory_tbl.all(),
                     "transactions_after" : transactions_tbl.all(),
                     },
@@ -329,12 +288,6 @@ def customer_service_agent(question: str, *, db, inventory_tbl, transactions_tbl
 ## ------------------------------------------------------ ##
 prompt = "I want to buy 3 pairs of classic sunglasses and 1 pair of aviator sunglasses."
 
-out = customer_service_agent(
-                            prompt,
-                            db = db,
-                            inventory_tbl = inventory_tbl,
-                            transactions_tbl = transactions_tbl,
-                            model = "o4-mini",
-                            temperature = 1.0,
-                            reseed = True,
-                            )
+out = customer_service_agent(prompt, db = db, inventory_tbl = inventory_tbl,
+                            transactions_tbl = transactions_tbl, model = "o4-mini",
+                            temperature = 1.0, reseed = True, )
