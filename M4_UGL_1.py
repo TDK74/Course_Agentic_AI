@@ -3,8 +3,8 @@ import re
 import research_tools
 import utils
 
-from aisuite import Client
 from datetime import datetime
+from aisuite import Client
 
 
 client = Client()
@@ -25,20 +25,12 @@ def find_references(task: str, model: str = "openai:gpt-4o", return_messages: bo
 
     messages = [{"role" : "user", "content" : prompt}]
 
-    tools = [
-            research_tools.arxiv_search_tool,
-            research_tools.tavily_search_tool,
-            research_tools.wikipedia_search_tool,
-            ]
+    tools = [research_tools.arxiv_search_tool, research_tools.tavily_search_tool,
+             research_tools.wikipedia_search_tool, ]
 
     try:
-        response = client.chat.completions.create(
-                                                model = model,
-                                                messages = messages,
-                                                tools = tools,
-                                                tool_choice = "auto",
-                                                max_turns = 5,
-                                                )
+        response = client.chat.completions.create(model = model, messages = messages, tools = tools,
+                                                tool_choice = "auto", max_turns = 5, )
         content = response.choices[0].message.content
 
         return (content, messages) if return_messages else content
@@ -53,18 +45,16 @@ research_result = find_references(research_task)
 utils.print_html(research_result, title = "Research Function Output")
 
 ## ------------------------------------------------------ ##
-TOP_DOMAINS = {
-            "wikipedia.org", "nature.com", "science.org", "sciencemag.org", "cell.com",
-            "mit.edu", "stanford.edu", "harvard.edu", "nasa.gov", "noaa.gov", "europa.eu",
+TOP_DOMAINS = {"wikipedia.org", "nature.com", "science.org", "sciencemag.org", "cell.com",
+               "mit.edu", "stanford.edu", "harvard.edu", "nasa.gov", "noaa.gov", "europa.eu",
 
-            "arxiv.org", "acm.org", "ieee.org", "neurips.cc", "icml.cc", "openreview.net",
+               "arxiv.org", "acm.org", "ieee.org", "neurips.cc", "icml.cc", "openreview.net",
 
-            "elifesciences.org", "pnas.org", "jmlr.org", "springer.com", "sciencedirect.com",
+               "elifesciences.org", "pnas.org", "jmlr.org", "springer.com", "sciencedirect.com",
 
-            "pbs.org", "nova.edu", "nvcc.edu", "cccco.edu",
+               "pbs.org", "nova.edu", "nvcc.edu", "cccco.edu",
 
-            "codecademy.com", "datacamp.com"
-            }
+               "codecademy.com", "datacamp.com"}
 
 def evaluate_tavily_results(TOP_DOMAINS, raw: str, min_ratio = 0.4):
     url_pattern = re.compile(r'https?://[^\s\]\)>\}]+', flags = re.IGNORECASE)
@@ -120,15 +110,11 @@ topic = ("Latest breakthroughs in Tokamak plasma confinement techniques for prac
 min_ratio = 0.34
 run_reflection = True
 
-TOP_DOMAINS = {
-                "wikipedia.org", "nature.com", "science.org", "arxiv.org",
-                "nasa.gov", "mit.edu", "stanford.edu", "harvard.edu"
-                }
+TOP_DOMAINS = {"wikipedia.org", "nature.com", "science.org", "arxiv.org",
+                "nasa.gov", "mit.edu", "stanford.edu", "harvard.edu"}
 
-utils.print_html(
-                json.dumps(sorted(list(TOP_DOMAINS)), indent = 2),
-                title = "<h3>Sample Preferred Domains</h3>"
-                )
+utils.print_html(json.dumps(sorted(list(TOP_DOMAINS)), indent = 2),
+                 title = "<h3>Sample Preferred Domains</h3>")
 
 research_task = f"Find 2–3 key papers and reliable overviews about {topic}."
 research_output = find_references(research_task)
@@ -142,15 +128,11 @@ topic = "recent advancements in fusion energy and the development of plasma-base
 min_ratio = 0.15
 run_reflection = True
 
-TOP_DOMAINS = {
-                "wikipedia.org", "nature.com", "science.org", "arxiv.org",
-                "nasa.gov", "mit.edu", "stanford.edu", "harvard.edu"
-                }
+TOP_DOMAINS = {"wikipedia.org", "nature.com", "science.org", "arxiv.org",
+               "nasa.gov", "mit.edu", "stanford.edu", "harvard.edu"}
 
-utils.print_html(
-                json.dumps(sorted(list(TOP_DOMAINS)), indent = 2),
-                title = "<h3>Sample Preferred Domains</h3>"
-                )
+utils.print_html(json.dumps(sorted(list(TOP_DOMAINS)), indent = 2),
+                 title = "<h3>Sample Preferred Domains</h3>")
 
 research_task = f"Find 2-3 key papers and reliable overviews about {topic}."
 research_output = find_references(research_task)
