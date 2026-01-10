@@ -1,5 +1,5 @@
-import aisuite as ai
 import json
+import aisuite as ai
 import display_functions
 import email_tools
 import utils
@@ -62,80 +62,64 @@ utils.print_html(content = example_prompt, title = "Example example_prompt")
 utils.reset_database()
 
 ## ------------------------------------------------------ ##
-prompt_ = build_prompt("Check for unread emails from boss@email.com, mark them as read, and send a " \
-                        "polite follow-up.")
+prompt_ = build_prompt("Check for unread emails from boss@email.com, mark them as read, and send " \
+                        "a polite follow-up.")
 
-response = client.chat.completions.create(
-                                        model = "openai:gpt-4.1",
+response = client.chat.completions.create(model = "openai:gpt-4.1",
                                         messages = [{"role" : "user", "content" : (prompt_)}],
-                                        tools = [
-                                                email_tools.search_unread_from_sender,
+                                        tools = [email_tools.search_unread_from_sender,
                                                 email_tools.list_unread_emails,
                                                 email_tools.search_emails,
                                                 email_tools.get_email,
                                                 email_tools.mark_email_as_read,
-                                                email_tools.send_email
-                                                ],
-                                        max_turns = 5,
-                                        )
+                                                email_tools.send_email],
+                                        max_turns = 5, )
 
 display_functions.pretty_print_chat_completion(response)
 
 ## ------------------------------------------------------ ##
 prompt_ = build_prompt("Delete alice@work.com email")
 
-response = client.chat.completions.create(
-                                        model = "openai:o4-mini",
+response = client.chat.completions.create(model = "openai:o4-mini",
                                         messages = [{"role" : "user", "content" : (prompt_)}],
-                                        tools = [
-                                                email_tools.search_unread_from_sender,
+                                        tools = [email_tools.search_unread_from_sender,
                                                 email_tools.list_unread_emails,
                                                 email_tools.search_emails,
                                                 email_tools.get_email,
                                                 email_tools.mark_email_as_read,
-                                                email_tools.send_email
-                                                ],
-                                        max_turns = 5
-                                        )
+                                                email_tools.send_email],
+                                        max_turns = 5)
 
 display_functions.pretty_print_chat_completion(response)
 
 ## ------------------------------------------------------ ##
 prompt_ = build_prompt("Delete alice@work.com email")
 
-response = client.chat.completions.create(
-                                        model = "openai:o4-mini",
+response = client.chat.completions.create(model = "openai:o4-mini",
                                         messages = [{"role" : "user", "content" : (prompt_)}],
-                                        tools = [
-                                                email_tools.search_unread_from_sender,
+                                        tools = [email_tools.search_unread_from_sender,
                                                 email_tools.list_unread_emails,
                                                 email_tools.search_emails,
                                                 email_tools.get_email,
                                                 email_tools.mark_email_as_read,
                                                 email_tools.send_email,
-                                                email_tools.delete_email
-                                                ],
-                                        max_turns = 5
-                                        )
+                                                email_tools.delete_email],
+                                        max_turns = 5)
 
 display_functions.pretty_print_chat_completion(response)
 
 ## ------------------------------------------------------ ##
 prompt_ = build_prompt("Delete the happy hour email")
 
-response = client.chat.completions.create(
-                                        model = "openai:o4-mini",
+response = client.chat.completions.create(model = "openai:o4-mini",
                                         messages = [{"role" : "user", "content" : (prompt_)}],
-                                        tools = [
-                                                email_tools.search_unread_from_sender,
+                                        tools = [email_tools.search_unread_from_sender,
                                                 email_tools.list_unread_emails,
                                                 email_tools.search_emails,
                                                 email_tools.get_email,
                                                 email_tools.mark_email_as_read,
                                                 email_tools.send_email,
-                                                email_tools.delete_email
-                                                ],
-                                        max_turns = 5
-                                        )
+                                                email_tools.delete_email],
+                                        max_turns = 5)
 
 display_functions.pretty_print_chat_completion(response)
