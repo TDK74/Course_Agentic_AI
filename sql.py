@@ -1,9 +1,9 @@
 import aisuite as ais
 import pandas as pd
 
-from dotenv import load_dotenv
 from typing import Any, Dict, Tuple
-from utils import create_transactions_db, get_schema, execute_sql, print_html
+from dotenv import load_dotenv
+from utils import create_transactions_db, execute_sql, get_schema, print_html
 
 
 _ = load_dotenv()
@@ -98,11 +98,8 @@ def run_sql_workflow(db_path: str, question: str, model_generation: str = "opena
     df = execute_sql(sql, db_path)
     print_html("📊 RExecute V1 query → Output: \n" + df.to_html())
 
-    feedback, refined_sql = evaluate_and_refine_sql(question = question,
-                                                    sql_query = sql,
-                                                    df = df,
-                                                    schema = schema,
-                                                    model = model_evaluation, )
+    feedback, refined_sql = evaluate_and_refine_sql(question = question, sql_query = sql,df = df,
+                                                    schema = schema, model = model_evaluation, )
 
     print_html("📝 Reflect on V1 SQL/output: \n" + feedback)
     print_html("🔁 Write V2 query: \n" + refined_sql)
@@ -110,11 +107,8 @@ def run_sql_workflow(db_path: str, question: str, model_generation: str = "opena
     refined_df = execute_sql(refined_sql, db_path)
     print_html("✅ Execute V2 query → Final answer: \n" + refined_df.to_html())
 
-    return {"original_sql" : sql,
-            "refined_sql" : refined_sql,
-            "original_results" : df,
-            "refined_results" : refined_df,
-            "feedback" : feedback, }
+    return {"original_sql" : sql, "refined_sql" : refined_sql, "original_results" : df,
+            "refined_results" : refined_df, "feedback" : feedback, }
 
 ## ------------------------------------------------------ ##
 results = run_sql_workflow("product.db",
