@@ -1,8 +1,9 @@
+import os
+import re
 import matplotlib.pyplot as plt
 import pandas as pd
-import os, re
 
-from typing import Dict, Any
+from typing import Any, Dict
 from utils import *
 
 
@@ -14,11 +15,10 @@ print_html(df.sample(n = 5), title = "Random Sample of Coffee Sales Data")
 ## ------------------------------------------------------ ##
 def get_response(model: str, prompt: str) -> str:
     if "claude" in model.lower() or "anthropic" in model.lower():
-        message = anthropic_client.messages.create(model = model,
-                                                   max_tokens = 1000,
-                                                   messages = [{"role" : "user",
+        message = anthropic_client.messages.create(model = model, max_tokens = 1000,
+                                                    messages = [{"role" : "user",
                                                                 "content" : [{"type" : "text",
-                                                                              "text" : prompt}]
+                                                                            "text" : prompt}]
                                                                 }]
                                                     )
 
@@ -90,20 +90,18 @@ if match:
 print_html(file_name_version_1, is_image = True, title = "Generated Chart (V1)")
 
 ## ------------------------------------------------------ ##
-def _anthropic_call_json_with_image(client, model_name: str, prompt: str,
-                                    media_type: str, b64: str) -> str:
-    msg = client.messages.create(model = model_name,
-                                max_tokens = 2000,
-                                temperature = 0,
+def _anthropic_call_json_with_image(client, model_name: str, prompt: str, media_type: str,
+                                    b64: str) -> str:
+    msg = client.messages.create(model = model_name, max_tokens = 2000, temperature = 0,
                                 system = ("You are a careful assistant. Respond with a single "
                                           "valid JSON object only. Do not include markdown, "
                                           "code fences, or commentary outside JSON."),
                                 messages = [{"role" : "user",
-                                             "content": [{"type" : "text", "text" : prompt},
-                                                         {"type" : "image",
-                                                          "source" : {"type" : "base64",
-                                                                      "media_type" : media_type,
-                                                                      "data": b64}
+                                            "content": [{"type" : "text", "text" : prompt},
+                                                        {"type" : "image",
+                                                        "source" : {"type" : "base64",
+                                                                    "media_type" : media_type,
+                                                                    "data": b64}
                                                         }]
                                             }]
                                 )
@@ -117,8 +115,8 @@ def _anthropic_call_json_with_image(client, model_name: str, prompt: str,
     return "".join(parts).strip()
 
 ## ------------------------------------------------------ ##
-def reflect_on_image_and_regenerate(chart_path: str, instruction: str, client,
-                                    model_name: str, out_path_v2: str) -> tuple[str, str]:
+def reflect_on_image_and_regenerate(chart_path: str, instruction: str, client, model_name: str,
+                                    out_path_v2: str) -> tuple[str, str]:
     media_type, b64 = encode_image_b64(chart_path)
 
     prompt = (
@@ -160,14 +158,15 @@ def reflect_on_image_and_regenerate(chart_path: str, instruction: str, client,
     else:
         data_url = f"data: {media_type}; base64, {b64}"
         resp = client.responses.create(model = model_name,
-                                       input = [{"role" : "user",
-                                                 "content" : [{"type" : "input_text",
-                                                               "text" : prompt},
-                                                               {"type" : "input_image",
+                                        input = [{"role" : "user",
+                                                "content" : [{"type" : "input_text",
+                                                                "text" : prompt},
+                                                                {"type" : "input_image",
                                                                 "image_url" : data_url},
                                                             ],
                                                 }],
                                         )
+
         content = (resp.output_text or "").strip()
 
     try:
@@ -215,12 +214,10 @@ def run_workflow(dataset_path: str, user_instructions: str, generation_model: st
     out_v1 = f"{image_basename}_v1.png"
     out_v2 = f"{image_basename}_v2.png"
 
-
     print_html("Step 1: Generating chart code... 📈\n")
     code_v1 = generate_chart_code(instruction = user_instructions, model = generation_model,
                                   out_path_v1 = out_v1, )
     print_html(code_v1, title = "Generated Code Output (V1)")
-
 
     print_html("Step 2: Executing chart code... 💻\n")
     chart_path_v1 = None
@@ -236,7 +233,6 @@ def run_workflow(dataset_path: str, user_instructions: str, generation_model: st
 
     print_html(chart_path_v1, is_image = True, title = "Generated Chart (V1)")
 
-
     print_html("Step 3: Evaluating and refining chart... 🔁\n")
     feedback, code_v2 = reflect_on_image_and_regenerate(chart_path = out_v1,
                                                         instruction = user_instructions,
@@ -245,7 +241,6 @@ def run_workflow(dataset_path: str, user_instructions: str, generation_model: st
                                                         out_path_v2 = out_v2, )
     print_html(feedback, title = "Feedback on V1 Chart")
     print_html(code_v2, title = "Regenerated Code Output (V2)")
-
 
     print_html("Step 4: Executing refined chart code... 🖼️\n")
     chart_path_v2 = None
@@ -269,8 +264,8 @@ def run_workflow(dataset_path: str, user_instructions: str, generation_model: st
 
 ## ------------------------------------------------------ ##
 result = run_workflow(dataset_path = "coffee_sales.csv",
-                      user_instructions = ("Create a chart showing year-over-year Q1 sales by "
-                                            "drink type."),
-                      generation_model = "gpt-4.1-mini",
-                      evaluation_model = "o4-mini",
-                      image_basename = "drink_sales")
+                    user_instructions = ("Create a chart showing year-over-year Q1 sales by "
+                                        "drink type."),
+                    generation_model = "gpt-4.1-mini",
+                    evaluation_model = "o4-mini",
+                    image_basename = "drink_sales")
