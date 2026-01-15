@@ -47,14 +47,13 @@ def market_research_agent(return_messages: bool = False):
             - The product(s) from the catalog that fit these trends.
             - A justification of why they are a good fit for the summer campaign.
             """
+
     messages = [{"role" : "user", "content" : prompt_}]
     tools_ = tools.get_available_tools()
 
     while True:
-        response = client.chat.completions.create(model = "openai:o4-mini",
-                                                messages = messages,
-                                                tools = tools_,
-                                                tool_choice = "auto")
+        response = client.chat.completions.create(model = "openai:o4-mini", messages = messages,
+                                                tools = tools_, tool_choice = "auto")
 
         msg = response.choices[0].message
 
@@ -105,31 +104,23 @@ def graphic_designer_agent(trend_insights: str, caption_style: str = "short punc
                 """
 
     chat_response = client.chat.completions.create(model = "openai:o4-mini",
-                                                    messages = [
-                                                                {"role" : "system",
-                                                                "content" : system_message
-                                                                },
+                                                    messages = [{"role" : "system",
+                                                                "content" : system_message},
                                                                 {"role" : "user",
-                                                                "content" : user_prompt
-                                                                }]
+                                                                "content" : user_prompt}]
                                                     )
 
     content = chat_response.choices[0].message.content.strip()
     match = re.search(r'\{.*\}', content, re.DOTALL)
-    parsed = json.loads(match.group(0)) if match else {"error" : "No JSON returned",
-                                                        "raw" : content}
+    parsed = json.loads(match.group(0)) if match else {"error": "No JSON returned", "raw": content}
 
     prompt = parsed["prompt"]
     caption = parsed["caption"]
 
     openai_client = openai.OpenAI()
 
-    image_response = openai_client.images.generate(model = "dall-e-3",
-                                                    prompt = prompt,
-                                                    size = size,
-                                                    quality = "standard",
-                                                    n = 1,
-                                                    response_format = "url")
+    image_response = openai_client.images.generate(model = "dall-e-3", prompt = prompt, size = size,
+                                            quality = "standard", n = 1, response_format = "url")
 
     image_url = image_response.data[0].url
 
@@ -153,9 +144,7 @@ def graphic_designer_agent(trend_insights: str, caption_style: str = "short punc
                                 <p><strong>Prompt:</strong> {prompt}</p>
                                 """)
 
-    return {"image_url" : image_url,
-            "prompt" : prompt,
-            "caption" : caption,
+    return {"image_url" : image_url, "prompt" : prompt, "caption" : caption,
             "image_path" : image_path}
 
 ## ------------------------------------------------------ ##
@@ -170,24 +159,15 @@ def copywriter_agent(image_path: str, trend_summary: str, model: str = "openai:o
 
     b64_img = base64.b64encode(img_bytes).decode("utf-8")
 
-    messages = [
-                {
-                "role" : "system",
+    messages = [{"role" : "system",
                 "content" : ("You are a copywriter that creates elegant campaign quotes "
-                             "based on an image and a marketing trend summary.")
-                },
-                {
-                "role" : "user",
-                "content" : [
-                            {
-                            "type" : "image_url",
-                            "image_url" : {
-                                            "url" : f"data:image/png;base64,{b64_img}",
-                                            "detail" : "auto"
-                                            }
+                             "based on an image and a marketing trend summary.")},
+                {"role" : "user",
+                "content" : [{"type" : "image_url",
+                            "image_url" : {"url" : f"data:image/png;base64,{b64_img}",
+                                            "detail" : "auto"}
                             },
-                            {
-                            "type" : "text",
+                            {"type" : "text",
                             "text" : f"""
                                     Here is a visual marketing image and a trend analysis:
 
@@ -195,14 +175,11 @@ def copywriter_agent(image_path: str, trend_summary: str, model: str = "openai:o
                                     \"\"\"{trend_summary}\"\"\"
 
                                     Please return a JSON object like:
-                                    {{
-                                      "quote": "A short, elegant campaign phrase (max 12 words)",
+                                    {{"quote": "A short, elegant campaign phrase (max 12 words)",
                                       "justification": "Why this quote matches the image and trend"
                                     }}"""
-                            }
-                            ]
-                }
-                ]
+                            }]
+                }]
 
     response = client.chat.completions.create(model = model, messages = messages, )
 
@@ -228,7 +205,6 @@ copywriter_agent_result = copywriter_agent(image_path = graphic_designer_agent_r
 ## ------------------------------------------------------ ##
 def packaging_agent(trend_summary: str, image_url: str, quote: str, justification: str,
                     output_path: str = "campaign_summary.md") -> str:
-
     utils.log_agent_title_html("Packaging Agent", "📦")
 
     styled_image_html = f"""
@@ -236,9 +212,8 @@ def packaging_agent(trend_summary: str, image_url: str, quote: str, justificatio
                         """
 
     beautified_summary = client.chat.completions.create(
-                                            model = "openai:o4-mini",
-                                            messages = [
-                                                {"role": "system",
+                                    model = "openai:o4-mini",
+                                    messages = [{"role": "system",
                                                 "content": "You are a marketing communication \
                                                             expert writing elegant campaign \
                                                             summaries for executives."},
@@ -251,7 +226,7 @@ def packaging_agent(trend_summary: str, image_url: str, quote: str, justificatio
                                                             \"\"\"{trend_summary.strip()}\"\"\"
                                                             """
                                                 }]
-                                            ).choices[0].message.content.strip()
+                                    ).choices[0].message.content.strip()
 
     utils.log_tool_result_html(beautified_summary)
 
@@ -280,14 +255,13 @@ def packaging_agent(trend_summary: str, image_url: str, quote: str, justificatio
     return output_path
 
 ## ------------------------------------------------------ ##
-packaging_agent_result = packaging_agent(
-                                    trend_summary = market_research_result,
-                                    image_url = graphic_designer_agent_result["image_path"],
-                                    quote = copywriter_agent_result["quote"],
-                                    justification = copywriter_agent_result["justification"],
-                                    output_path = (f"campaign_summary_"
+packaging_agent_result = packaging_agent(trend_summary = market_research_result,
+                                        image_url = graphic_designer_agent_result["image_path"],
+                                        quote = copywriter_agent_result["quote"],
+                                        justification = copywriter_agent_result["justification"],
+                                        output_path = (f"campaign_summary_"
                                             f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.md")
-                                    )
+                                        )
 
 ## ------------------------------------------------------ ##
 with open(packaging_agent_result, "r", encoding = "utf-8") as f:
@@ -309,10 +283,7 @@ def run_sunglasses_campaign_pipeline(output_path: str = "campaign_summary.md") -
     justification = quote_result.get("justification", "")
     print("💬 Quote created")
 
-    md_path = packaging_agent(
-                            trend_summary = trend_summary,
-                            image_url = image_path,
-                            quote = quote,
+    md_path = packaging_agent(trend_summary = trend_summary, image_url = image_path, quote = quote,
                             justification = justification,
                             output_path = (f"campaign_summary_"
                                             f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.md")
@@ -320,12 +291,8 @@ def run_sunglasses_campaign_pipeline(output_path: str = "campaign_summary.md") -
 
     print(f"📦 Report generated: {md_path}")
 
-    return {
-            "trend_summary" : trend_summary,
-            "visual" : visual_result,
-            "quote" : quote_result,
-            "markdown_path" : md_path
-            }
+    return {"trend_summary" : trend_summary, "visual" : visual_result,
+            "quote" : quote_result, "markdown_path" : md_path}
 
 ## ------------------------------------------------------ ##
 results = run_sunglasses_campaign_pipeline()
