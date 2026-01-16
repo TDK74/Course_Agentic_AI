@@ -1,5 +1,5 @@
-import aisuite as ais
 import json
+import aisuite as ais
 import pandas as pd
 import utils
 
@@ -31,6 +31,7 @@ def generate_sql(question: str, schema: str, model: str) -> str:
 
             Respond with the SQL only.
             """
+
     response = client.chat.completions.creat(model = model,
                                             messages = [{"role" : "user", "content" : prompt}],
                                             temperature = 0, )
@@ -90,6 +91,7 @@ def refine_sql(question: str, sql_query: str, schema: str, model: str) -> tuple[
               "refined_sql": "<final SQL to run>"
             }}
             """
+
     response = client.chat.completions.create(model = model,
                                               messages = [{"role" : "user", "content" : prompt}],
                                               temperature = 0, )
@@ -110,10 +112,8 @@ def refine_sql(question: str, sql_query: str, schema: str, model: str) -> tuple[
     return feedback, refined_sql
 
 ## ------------------------------------------------------ ##
-feedback, sql_V2 = refine_sql(question = question,
-                              sql_query = sql_V1,
-                              schema = schema,
-                              model = "openai:gpt-4.1")
+feedback, sql_V2 = refine_sql(question = question, sql_query = sql_V1, schema = schema,
+                            model = "openai:gpt-4.1")
 
 utils.print_html(question, title = "User Question")
 
@@ -130,7 +130,7 @@ utils.print_html(df_sql_V2, title = "SQL Output of V2 - ❌ Does NOT fully answe
 
 ## ------------------------------------------------------ ##
 def refine_sql_external_feedback(question: str, sql_query: str, df_feedback: pd.DataFrame,
-                                 schema: str, model: str, ) -> tuple[str, str]:
+                                schema: str, model: str, ) -> tuple[str, str]:
     prompt = f"""
             You are a SQL reviewer and refiner.
 
@@ -154,6 +154,7 @@ def refine_sql_external_feedback(question: str, sql_query: str, df_feedback: pd.
             - "feedback": brief evaluation and suggestions
             - "refined_sql": the final SQL to run
             """
+
     response = client.chat.completions.create(model = model,
                                               messages = [{"role" : "user", "content" : prompt}],
                                               temperature = 1.0, )
@@ -176,10 +177,8 @@ def refine_sql_external_feedback(question: str, sql_query: str, df_feedback: pd.
 ## ------------------------------------------------------ ##
 df_sql_V1 = utils.execute_sql(sql_V1, db_path = 'products.db')
 
-feedback, sql_V2 = refine_sql_external_feedback(question = question,
-                                                sql_query = sql_V1,
-                                                df_feedback = df_sql_V1,
-                                                schema = schema,
+feedback, sql_V2 = refine_sql_external_feedback(question = question, sql_query = sql_V1,
+                                                df_feedback = df_sql_V1, schema = schema,
                                                 model = "openai:gpt-4.1")
 
 utils.print_html(question, title = "User Question")
@@ -205,10 +204,8 @@ def run_sql_workflow(db_path: str, question: str, model_generation: str = "opena
     df_v1 = utils.execute_sql(sql_v1, db_path)
     utils.print_html(df_v1, title = "🧪 Step 3 — Execute V1 (SQL Output)")
 
-    feedback, sql_v2 = refine_sql_external_feedback(question = question,
-                                                    sql_query = sql_v1,
-                                                    df_feedback = df_v1,
-                                                    schema = schema,
+    feedback, sql_v2 = refine_sql_external_feedback(question = question, sql_query = sql_v1,
+                                                    df_feedback = df_v1, schema = schema,
                                                     model = model_evalution, )
 
     utils.print_html(feedback, title = "🧭 Step 4 — Reflect on V1 (Feedback)")
