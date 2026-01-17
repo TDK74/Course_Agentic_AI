@@ -1,5 +1,5 @@
-import re
 import json
+import re
 import utils
 
 
@@ -50,12 +50,9 @@ def generate_chart_code(instruction: str, model: str, out_path_v1: str) -> str:
     return response
 
 ## ------------------------------------------------------ ##
-code_v1 = generate_chart_code(
-                            instruction = ("Create a plot comparing Q1 coffee sales in 2024 and "
+code_v1 = generate_chart_code(instruction = ("Create a plot comparing Q1 coffee sales in 2024 and "
                                             "2025 using the data in coffee_sales.csv."),
-                            model = "gpt-4o-mini",
-                            out_path_v1 = "chart_v1.png"
-                            )
+                            model = "gpt-4o-mini", out_path_v1 = "chart_v1.png")
 
 utils.print_html(code_v1, title = "LLM output with first draft code")
 
@@ -71,13 +68,8 @@ if match:
 utils.print_html(content = "chart_v1.png", title = "Generated Chart (V1)", is_image = True)
 
 ## ------------------------------------------------------ ##
-def reflect_on_image_and_regenerate(
-                                    chart_path: str,
-                                    instruction: str,
-                                    model_name: str,
-                                    out_path_v2: str,
-                                    code_v1: str,
-                                    ) -> tuple[str, str]:
+def reflect_on_image_and_regenerate(chart_path: str, instruction: str, model_name: str,
+                                    out_path_v2: str, code_v1: str, ) -> tuple[str, str]:
     media_type, b64 = utils.encode_image_b64(chart_path)
 
     prompt = f"""
@@ -159,15 +151,14 @@ def reflect_on_image_and_regenerate(
     return feedback, refined_code
 
 ## ------------------------------------------------------ ##
-feedback, code_v2 = reflect_on_image_and_regenerate(
-                                                chart_path = "chart_v1.png",
-                                                instruction = ("Create a plot comparing Q1 coffee "
-                                                                "sales in 2024 and 2025 using "
-                                                                "the data in coffee_sales.csv."),
-                                                model_name = "o4-mini",
-                                                out_path_v2 = "chart_v2.png",
-                                                code_v1 = code_v1,
-                                                )
+feedback, code_v2 = reflect_on_image_and_regenerate(chart_path = "chart_v1.png",
+                                                    instruction = ("Create a plot comparing Q1 "
+                                                                    "coffee sales in 2024 and 2025 "
+                                                                    "using the data in "
+                                                                    "coffee_sales.csv."),
+                                                    model_name = "o4-mini",
+                                                    out_path_v2 = "chart_v2.png",
+                                                    code_v1 = code_v1, )
 
 utils.print_html(feedback, title  ="Feedback on V1 Chart")
 utils.print_html(code_v2, title = "Regenerated Code Output (V2)")
@@ -183,13 +174,8 @@ if match:
 utils.print_html(content = "chart_v2.png", title = "Regenerated Chart (V2)", is_image = True)
 
 ## ------------------------------------------------------ ##
-def run_workflow(
-                dataset_path: str,
-                user_instructions: str,
-                generation_model: str,
-                reflection_model: str,
-                image_basename: str = "chart",
-                ):
+def run_workflow(dataset_path: str, user_instructions: str, generation_model: str,
+                reflection_model: str, image_basename: str = "chart", ):
     df = utils.load_and_prepare_data(dataset_path)
     utils.print_html(df.sample(n = 5), title = "Random Sample of Dataset")
 
@@ -197,11 +183,8 @@ def run_workflow(
     out_v2 = f"{image_basename}_v2.png"
 
     utils.print_html("Step 1: Generating chart code (V1)… 📈")
-    code_v1 = generate_chart_code(
-                                instruction = user_instructions,
-                                model = generation_model,
-                                out_path_v1 = out_v1,
-                                )
+    code_v1 = generate_chart_code(instruction = user_instructions, model = generation_model,
+                                out_path_v1 = out_v1, )
     utils.print_html(code_v1, title = "LLM output with first draft code (V1)")
 
     utils.print_html("Step 2: Executing chart code (V1)… 💻")
@@ -215,13 +198,10 @@ def run_workflow(
     utils.print_html(out_v1, is_image = True, title = "Generated Chart (V1)")
 
     utils.print_html("Step 3: Reflecting on V1 (image + code) and generating improvements… 🔁")
-    feedback, code_v2 = reflect_on_image_and_regenerate(
-                                                        chart_path = out_v1,
+    feedback, code_v2 = reflect_on_image_and_regenerate(chart_path = out_v1,
                                                         instruction = user_instructions,
                                                         model_name = reflection_model,
-                                                        out_path_v2 = out_v2,
-                                                        code_v1 = code_v1,
-                                                        )
+                                                        out_path_v2 = out_v2, code_v1 = code_v1, )
 
     utils.print_html(feedback, title = "Reflection feedback on V1")
     utils.print_html(code_v2, title = "LLM output with revised code (V2)")
@@ -236,8 +216,8 @@ def run_workflow(
 
     utils.print_html(out_v2, is_image = True, title = "Regenerated Chart (V2)")
 
-    return {"code_v1" : code_v1, "chart_v1" : out_v1, "feedback" : feedback,
-            "code_v2" : code_v2, "chart_v2" : out_v2, }
+    return {"code_v1" : code_v1, "chart_v1" : out_v1, "feedback" : feedback, "code_v2" : code_v2,
+            "chart_v2" : out_v2, }
 
 ## ------------------------------------------------------ ##
 user_instructions = ("Create a plot comparing Q1 coffee sales in 2024 and 2025 using the data in "
@@ -246,10 +226,6 @@ generation_model = "gpt-4.1-mini"
 reflection_model = "o4-mini"
 image_basename = "drink_sales"
 
-_ = run_workflow(
-                dataset_path = "coffee_sales.csv",
-                user_instructions = user_instructions,
-                generation_model = generation_model,
-                reflection_model = reflection_model,
-                image_basename = image_basename
-                )
+_ = run_workflow(dataset_path = "coffee_sales.csv", user_instructions = user_instructions,
+                generation_model = generation_model, reflection_model = reflection_model,
+                image_basename = image_basename)
