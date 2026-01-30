@@ -1,9 +1,9 @@
 # Course: Agentic AI
 
 ### Acknowledgments
-The Python code is from the course 'Agentic AI' on DeepLearning.AI. The course content is available for free, while the certificate and graded assessments require a paid subscription.  
+The Python code is from the course "Agentic AI" on DeepLearning.AI. The course content is available for free, while the certificate and graded assessments require a paid subscription.  
 For more details, visit:  
-<https://www.deeplearning.ai/courses/agentic-ai/>
+<https://learn.deeplearning.ai/courses/agentic-ai/information>
 
 ### Description
 This repository contains only Python code from my practice after each lesson.  
